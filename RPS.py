@@ -6,5 +6,6 @@ def player(prev_play, opponent_history=[]):
     guess = "R"
     if len(opponent_history) > 2:
         guess = opponent_history[-2]
+        print(3)
 
     return guess

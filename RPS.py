@@ -100,10 +100,9 @@ def player(prev_play, opponent_history=[],
         opponent_history.clear()
         my_history.clear()
         counter_history.clear()
-        play_order.clear()
         my_history.extend('R')
         counter_history.extend('P')
-        play_order.extend({
+        play_order[0].update({
                 "RR": 0, "RP": 0, "RS": 0, "PR": 0, "PP": 0, "PS": 0, "SR": 0, "SP": 0, "SS": 0
             })
         player_type[0] = PlayerType.UNKNOWN
@@ -213,7 +212,6 @@ def counter_abbey(your_moves, play_order):
     prediction = counter(max(sub_order, key=sub_order.get)[-1:])
     return counter(prediction)
 
-
 def is_mrugesh(opponent_moves, your_moves):
     #ipdb.set_trace()
 
@@ -242,7 +240,6 @@ def predict_move(opponent, opponent_moves, your_moves, play_order):
     move = None
     match opponent:
         case PlayerType.QUINCY:
-            #print('de')
             move = counter_Quincy(opponent_moves)
 
         case PlayerType.MRUGESH:

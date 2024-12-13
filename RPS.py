@@ -17,7 +17,8 @@ def player(prev_play, opponent_history=[],
             }], 
             my_history=['R'], 
             counter_history = ['P'], 
-            player_type = [PlayerType.UNKNOWN]
+            player_type = [PlayerType.UNKNOWN], 
+            training_rounds = 300 # Training Round must be > 10
            ):
 
     #ipdb.set_trace()
@@ -29,18 +30,17 @@ def player(prev_play, opponent_history=[],
     
     ## DETECTION PHASE 
     # Training phase to detect the type of the opponent player
-    if len(opponent_history) < 300:
+    if len(opponent_history) < training_rounds:
         move = random.choice(['R', 'P', 'S'])
         #move = 'P'
         my_history.append(move)
         counter_history.append(counter(move))
 
-    # Predict the opponent type after 300 round
-    elif len(opponent_history) == 300:
+    # Predict the opponent type after  training_round ended
+    elif len(opponent_history) == training_rounds:
         if is_quincy(opponent_history):
             print('QUINCY ZA')
             player_type[0] = PlayerType.QUINCY
-
 
         elif is_Kris(counter_history, opponent_history):
             print('KRIIIIS')
@@ -57,21 +57,20 @@ def player(prev_play, opponent_history=[],
         else:
             print('UNKNOWW')
             move = 'R'
-            my_history.append(move)
-            counter_history.append(counter(move))
-        
-        move = random.choice(['R', 'P', 'S'])
+        move = predict_move(player_type[0], opponent_history)
         my_history.append(move)
         counter_history.append(counter(move))
 
     # Counter depending on the opponent type 
     else:
-        move = 'R'
+        move = predict_move(player_type[0], opponent_history)
+
         my_history.append(move)
         counter_history.append(counter(move))
     
     opponent_history.append(prev_play)
 
+    # CLEAR AFTER 1000 Rounds ended
     if(len(opponent_history) == 1000):
 
         opponent_history.clear()
@@ -81,7 +80,7 @@ def player(prev_play, opponent_history=[],
         counter_history.extend('P')
         player_type[0] = PlayerType.UNKNOWN
 
-    return move
+    return counter(move)
         
 
 
@@ -166,10 +165,6 @@ def is_mrugesh(opponent_moves, your_moves):
         mrugesh_predictions.append( counter(most_frequent))
     return mrugesh_predictions[: len(mrugesh_predictions) - 2] == opponent_moves[1:]
 
-        
-
-
-
 def counter(move):
     match move:
         case 'R':
@@ -181,4 +176,43 @@ def counter(move):
         case _:
             ipdb.set_trace()
             return 'R'
+
+def predict_move(opponent, opponent_moves):
+    move = None
+    match opponent:
+        case PlayerType.QUINCY:
+            #print('de')
+            move = counter_Quincy(opponent_moves)
+
+        case PlayerType.MRUGESH:
+            #print('mrugesh logic')
+            move = random.choice(['R', 'P', 'S']) 
+
+        case PlayerType.KRIS:
+            #print('kris logic')
+            move = random.choice(['R', 'P', 'S']) 
+
+        case PlayerType.ABBEY:
+            #print('abbey logic')
+            move = random.choice(['R', 'P', 'S']) 
+
+        case _:
+            #print('unknown')
+            move = random.choice(['R', 'P', 'S']) 
+        
+    return move
+
+def counter_Quincy(opponent_moves):
+    last_two_bfr_actual_play = "".join(opponent_moves[-2:])
+    # Dict to predict the next move if i use the last two move 
+    # ( predict the 4 th Element since the third is the actual move played (NOT ADDED TO OPPONENT HISTORY YET))
+    next_move = {
+    'RR': 'P',
+    'RP': 'S',
+    'PP': 'R',
+    'PS': 'R',
+    'SR': 'P',
+    }
+    return next_move[last_two_bfr_actual_play] 
+
     

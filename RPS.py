@@ -135,9 +135,13 @@ def counter_Quincy(opponent_moves):
 
 def is_Kris(counter_history, opponent_history):
     # - 2 to handle the offset between the array
-    
 
     return counter_history[:len(counter_history) - 2] == opponent_history[1:]
+
+def counter_Kris(your_moves):
+    prev_opponent_play = your_moves[-1]
+    prediction = counter(prev_opponent_play)
+    return counter(prediction)
 
 def is_abbey(opponent_moves, your_moves, order_to_update):
 
@@ -248,13 +252,13 @@ def predict_move(opponent, opponent_moves, your_moves, play_order):
 
         case PlayerType.KRIS:
             #print('kris logic')
-            move = random.choice(['R', 'P', 'S']) 
+            move = counter_Kris(your_moves)
 
         case PlayerType.ABBEY:
-            #print('abbey logic')
             move = counter_abbey(your_moves, play_order)
 
         case _:
+            # DEFAULT STRATEGY FOR UNKNWON PLAYER FOR NOW RANDOM
             #print('unknown')
             move = random.choice(['R', 'P', 'S']) 
         

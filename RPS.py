@@ -59,8 +59,11 @@ def player(prev_play, opponent_history=[],
             print('KRIIIIS')
             player_type[0] = PlayerType.KRIS
 
-        elif(is_abbey(opponent_history, my_history)):
+        elif(is_abbey(opponent_history, my_history, play_order)):
             print('ABBEY')
+            # print('play_order')
+            # print(play_order[0])
+
             player_type[0] = PlayerType.ABBEY
         
         elif(is_mrugesh(opponent_history, my_history)):
@@ -72,7 +75,9 @@ def player(prev_play, opponent_history=[],
             move = 'R'
         move = predict_move(player_type[0], 
                             opponent_moves = opponent_history, 
-                            your_moves = my_history)
+                            your_moves = my_history, 
+                            play_order= play_order
+                            )
         my_history.append(move)
         counter_history.append(counter(move))
 
@@ -80,7 +85,9 @@ def player(prev_play, opponent_history=[],
     else:
         move = predict_move(player_type[0], 
                             opponent_moves = opponent_history, 
-                            your_moves = my_history)
+                            your_moves = my_history,
+                            play_order= play_order
+                            )
 
         my_history.append(move)
         counter_history.append(counter(move))
@@ -93,8 +100,12 @@ def player(prev_play, opponent_history=[],
         opponent_history.clear()
         my_history.clear()
         counter_history.clear()
+        play_order.clear()
         my_history.extend('R')
         counter_history.extend('P')
+        play_order.extend({
+                "RR": 0, "RP": 0, "RS": 0, "PR": 0, "PP": 0, "PS": 0, "SR": 0, "SP": 0, "SS": 0
+            })
         player_type[0] = PlayerType.UNKNOWN
 
     return move
@@ -129,7 +140,7 @@ def is_Kris(counter_history, opponent_history):
 
     return counter_history[:len(counter_history) - 2] == opponent_history[1:]
 
-def is_abbey(opponent_moves, your_moves):
+def is_abbey(opponent_moves, your_moves, order_to_update):
 
     # Initialize Abbey's play_order dictionary
     play_order = {
@@ -176,8 +187,32 @@ def is_abbey(opponent_moves, your_moves):
                 prediction = 'R'
 
             abbey_predictions.append(counter(prediction))
-    
+
+    order_to_update[0].update(play_order)
+
     return opponent_moves == abbey_predictions
+
+def counter_abbey(your_moves, play_order):
+
+    prev_opponent_play = your_moves[-1]
+    last_two = "".join(your_moves[-2:])
+    if len(last_two) == 2:
+        play_order[0][last_two] += 1
+
+    potential_plays = [
+        prev_opponent_play + "R",
+        prev_opponent_play + "P",
+        prev_opponent_play + "S",
+    ]
+
+    sub_order = {
+        k: play_order[0][k]
+        for k in potential_plays if k in play_order[0]
+    }
+
+    prediction = counter(max(sub_order, key=sub_order.get)[-1:])
+    return counter(prediction)
+
 
 def is_mrugesh(opponent_moves, your_moves):
     #ipdb.set_trace()
@@ -203,7 +238,7 @@ def counter_mrugesh(your_moves):
     return counter(prediction) 
 
 
-def predict_move(opponent, opponent_moves, your_moves):
+def predict_move(opponent, opponent_moves, your_moves, play_order):
     move = None
     match opponent:
         case PlayerType.QUINCY:
@@ -220,7 +255,7 @@ def predict_move(opponent, opponent_moves, your_moves):
 
         case PlayerType.ABBEY:
             #print('abbey logic')
-            move = random.choice(['R', 'P', 'S']) 
+            move = counter_abbey(your_moves, play_order)
 
         case _:
             #print('unknown')

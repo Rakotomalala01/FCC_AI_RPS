@@ -11,6 +11,19 @@ class PlayerType:
     UNKNOWN = "unknown"
 
 
+def counter(move):
+    match move:
+        case 'R':
+            return 'P'
+        case 'P':
+            return 'S'
+        case 'S':
+            return 'R'
+        case _:
+            ipdb.set_trace()
+            return 'R'
+        
+
 def player(prev_play, opponent_history=[], 
            play_order=[{
                 "RR": 0, "RP": 0, "RS": 0, "PR": 0, "PP": 0, "PS": 0, "SR": 0, "SP": 0, "SS": 0
@@ -57,13 +70,17 @@ def player(prev_play, opponent_history=[],
         else:
             print('UNKNOWW')
             move = 'R'
-        move = predict_move(player_type[0], opponent_history)
+        move = predict_move(player_type[0], 
+                            opponent_moves = opponent_history, 
+                            your_moves = my_history)
         my_history.append(move)
         counter_history.append(counter(move))
 
     # Counter depending on the opponent type 
     else:
-        move = predict_move(player_type[0], opponent_history)
+        move = predict_move(player_type[0], 
+                            opponent_moves = opponent_history, 
+                            your_moves = my_history)
 
         my_history.append(move)
         counter_history.append(counter(move))
@@ -80,10 +97,8 @@ def player(prev_play, opponent_history=[],
         counter_history.extend('P')
         player_type[0] = PlayerType.UNKNOWN
 
-    return counter(move)
+    return move
         
-
-
 
 def is_quincy(opponent_history):
     if len(opponent_history) < 10:
@@ -93,6 +108,20 @@ def is_quincy(opponent_history):
 
     # Compare the first 10 elements of opponent history with double cycle
     return opponent_history[:10] == double_cycle
+
+def counter_Quincy(opponent_moves):
+    last_two_bfr_actual_play = "".join(opponent_moves[-2:])
+    # Dict to predict the next move if i use the last two move 
+    # ( predict the 4 th Element since the third is the actual move played (NOT ADDED TO OPPONENT HISTORY YET))
+    next_move = {
+    'RR': 'P',
+    'RP': 'S',
+    'PP': 'R',
+    'PS': 'R',
+    'SR': 'P',
+    }
+    return counter(next_move[last_two_bfr_actual_play])
+
 
 def is_Kris(counter_history, opponent_history):
     # - 2 to handle the offset between the array
@@ -151,7 +180,6 @@ def is_abbey(opponent_moves, your_moves):
     return opponent_moves == abbey_predictions
 
 def is_mrugesh(opponent_moves, your_moves):
-    print("test mrugesh")
     #ipdb.set_trace()
 
     opponent_history = ['']
@@ -163,21 +191,19 @@ def is_mrugesh(opponent_moves, your_moves):
         if most_frequent == '':
             most_frequent = "S"
         mrugesh_predictions.append( counter(most_frequent))
+
     return mrugesh_predictions[: len(mrugesh_predictions) - 2] == opponent_moves[1:]
 
-def counter(move):
-    match move:
-        case 'R':
-            return 'P'
-        case 'P':
-            return 'S'
-        case 'S':
-            return 'R'
-        case _:
-            ipdb.set_trace()
-            return 'R'
+def counter_mrugesh(your_moves):
 
-def predict_move(opponent, opponent_moves):
+    last_ten = your_moves[-10:]
+    most_frequent = max(set(last_ten), key=last_ten.count)
+    prediction = counter(most_frequent)
+
+    return counter(prediction) 
+
+
+def predict_move(opponent, opponent_moves, your_moves):
     move = None
     match opponent:
         case PlayerType.QUINCY:
@@ -186,7 +212,7 @@ def predict_move(opponent, opponent_moves):
 
         case PlayerType.MRUGESH:
             #print('mrugesh logic')
-            move = random.choice(['R', 'P', 'S']) 
+            move = counter_mrugesh(your_moves)
 
         case PlayerType.KRIS:
             #print('kris logic')
@@ -202,17 +228,9 @@ def predict_move(opponent, opponent_moves):
         
     return move
 
-def counter_Quincy(opponent_moves):
-    last_two_bfr_actual_play = "".join(opponent_moves[-2:])
-    # Dict to predict the next move if i use the last two move 
-    # ( predict the 4 th Element since the third is the actual move played (NOT ADDED TO OPPONENT HISTORY YET))
-    next_move = {
-    'RR': 'P',
-    'RP': 'S',
-    'PP': 'R',
-    'PS': 'R',
-    'SR': 'P',
-    }
-    return next_move[last_two_bfr_actual_play] 
+ 
+
+
+
 
     

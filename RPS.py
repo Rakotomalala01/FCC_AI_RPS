@@ -49,8 +49,12 @@ def player(prev_play, opponent_history=[],
         elif(is_abbey(opponent_history, my_history)):
             print('ABBEY')
             player_type[0] = PlayerType.ABBEY
-        else:
+        
+        elif(is_mrugesh(opponent_history, my_history)):
+            print('MRUGESHHHHH')
+            player_type[0] = PlayerType.MRUGESH
 
+        else:
             print('UNKNOWW')
             move = 'R'
             my_history.append(move)
@@ -69,9 +73,7 @@ def player(prev_play, opponent_history=[],
     opponent_history.append(prev_play)
 
     if(len(opponent_history) == 1000):
-        print(f"Length of opponent_history before clear: {len(opponent_history)}")
-        print(f"Length of my_history before clear: {len(my_history)}")
-        print(f"Length of counter_history before clear: {len(counter_history)}")
+
         opponent_history.clear()
         my_history.clear()
         counter_history.clear()
@@ -148,6 +150,23 @@ def is_abbey(opponent_moves, your_moves):
             abbey_predictions.append(counter(prediction))
     
     return opponent_moves == abbey_predictions
+
+def is_mrugesh(opponent_moves, your_moves):
+    print("test mrugesh")
+    #ipdb.set_trace()
+
+    opponent_history = ['']
+    mrugesh_predictions = ['R']
+    for move in your_moves[1:]:
+        opponent_history.append(move)
+        last_ten = opponent_history[-10:]
+        most_frequent = max(set(last_ten), key=last_ten.count)
+        if most_frequent == '':
+            most_frequent = "S"
+        mrugesh_predictions.append( counter(most_frequent))
+    return mrugesh_predictions[: len(mrugesh_predictions) - 2] == opponent_moves[1:]
+
+        
 
 
 

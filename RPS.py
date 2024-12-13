@@ -24,6 +24,9 @@ def player(prev_play, opponent_history=[],
     if not prev_play:
         prev_play = 'R'
     
+    move = None
+    
+    
     ## DETECTION PHASE 
     # Training phase to detect the type of the opponent player
     if len(opponent_history) < 300:
@@ -32,55 +35,48 @@ def player(prev_play, opponent_history=[],
         my_history.append(move)
         counter_history.append(counter(move))
 
-    # Predict the opponent type 
+    # Predict the opponent type after 300 round
     elif len(opponent_history) == 300:
-        player_type[0] = PlayerType.KRIS
-
-        print('opponent_moves')
-
-        print(len(opponent_history))
-        print(opponent_history[:20])
-
-        print('your moves')
-
-        print(len(my_history))
-
-        print(my_history[:20])
-
-        print('counter_history moves')
-
-        print(len(counter_history))
-
-        print(counter_history[:20])
         if is_quincy(opponent_history):
             print('QUINCY ZA')
+            player_type[0] = PlayerType.QUINCY
+
 
         elif is_Kris(counter_history, opponent_history):
             print('KRIIIIS')
-            print('KRIIIIS')
-            print('KRIIIIS')
-            print('KRIIIIS')
-
-            player_type[0] = PlayerType.QUINCY
+            player_type[0] = PlayerType.KRIS
 
         elif(is_abbey(opponent_history, my_history)):
             print('ABBEY')
+            player_type[0] = PlayerType.ABBEY
         else:
 
             print('UNKNOWW')
-
-        move = 'R'
+            move = 'R'
+            my_history.append(move)
+            counter_history.append(counter(move))
+        
+        move = random.choice(['R', 'P', 'S'])
+        my_history.append(move)
+        counter_history.append(counter(move))
 
     # Counter depending on the opponent type 
     else:
         move = 'R'
+        my_history.append(move)
+        counter_history.append(counter(move))
     
     opponent_history.append(prev_play)
 
     if(len(opponent_history) == 1000):
+        print(f"Length of opponent_history before clear: {len(opponent_history)}")
+        print(f"Length of my_history before clear: {len(my_history)}")
+        print(f"Length of counter_history before clear: {len(counter_history)}")
         opponent_history.clear()
         my_history.clear()
         counter_history.clear()
+        my_history.extend('R')
+        counter_history.extend('P')
         player_type[0] = PlayerType.UNKNOWN
 
     return move
@@ -99,11 +95,11 @@ def is_quincy(opponent_history):
 
 def is_Kris(counter_history, opponent_history):
     # - 2 to handle the offset between the array
+    
 
     return counter_history[:len(counter_history) - 2] == opponent_history[1:]
 
 def is_abbey(opponent_moves, your_moves):
-
 
     # Initialize Abbey's play_order dictionary
     play_order = {
@@ -114,7 +110,9 @@ def is_abbey(opponent_moves, your_moves):
 
     # Simulate Abbey's behavior based on your moves
     abbey_predictions = []
-    for i in range(0, len(your_moves)):
+
+    # Length your move - 1 beause opponent move is not updated With your moves ( based on opponent history )
+    for i in range(0, len(your_moves) - 1):
         #ipdb.set_trace()
 
         if i == 0 :
@@ -149,31 +147,7 @@ def is_abbey(opponent_moves, your_moves):
 
             abbey_predictions.append(counter(prediction))
     
-
-    matches = sum(1 for p, o in zip(abbey_predictions, opponent_moves) if p == o)
-
-    # print('opponent_moves')
-
-    # print(len(opponent_moves))
-    # print(opponent_moves[:20])
-
-    # print('abbey_predictions')
-
-    # print(len(abbey_predictions))
-    # print(abbey_predictions[:20])
-
-    # print('your moves')
-
-    # print(len(your_moves))
-
-    # print(your_moves[:20])
-
-
-
-
-    # If the opponent's moves match abbey's predictions more than a threshold, detect abbey
-    threshold = 0.9  
-    return matches / len(opponent_moves) >= threshold 
+    return opponent_moves == abbey_predictions
 
 
 

@@ -1,8 +1,6 @@
 # The example function below keeps track of the opponent's history and plays whatever the opponent played two plays ago. It is not a very good player so you will need to change the code to pass the challenge.
 import random
 
-
-import ipdb
 class PlayerType:
     QUINCY = "quincy"
     MRUGESH = "mrugesh"
@@ -20,7 +18,6 @@ def counter(move):
         case 'S':
             return 'R'
         case _:
-            ipdb.set_trace()
             return 'R'
         
 
@@ -34,7 +31,6 @@ def player(prev_play, opponent_history=[],
             training_rounds = 300 # Training Round must be > 10
            ):
 
-    #ipdb.set_trace()
     if not prev_play:
         prev_play = 'R'
     
@@ -52,27 +48,17 @@ def player(prev_play, opponent_history=[],
     # Predict the opponent type after  training_round ended
     elif len(opponent_history) == training_rounds:
         if is_quincy(opponent_history):
-            print('QUINCY ZA')
             player_type[0] = PlayerType.QUINCY
 
         elif is_Kris(counter_history, opponent_history):
-            print('KRIIIIS')
             player_type[0] = PlayerType.KRIS
 
         elif(is_abbey(opponent_history, my_history, play_order)):
-            print('ABBEY')
-            # print('play_order')
-            # print(play_order[0])
-
             player_type[0] = PlayerType.ABBEY
         
         elif(is_mrugesh(opponent_history, my_history)):
-            print('MRUGESHHHHH')
             player_type[0] = PlayerType.MRUGESH
 
-        else:
-            print('UNKNOWW')
-            move = 'R'
         move = predict_move(player_type[0], 
                             opponent_moves = opponent_history, 
                             your_moves = my_history, 
@@ -157,7 +143,6 @@ def is_abbey(opponent_moves, your_moves, order_to_update):
 
     # Length your move - 1 beause opponent move is not updated With your moves ( based on opponent history )
     for i in range(0, len(your_moves) - 1):
-        #ipdb.set_trace()
 
         if i == 0 :
             # For the first line we add RFirst round
@@ -217,7 +202,6 @@ def counter_abbey(your_moves, play_order):
     return counter(prediction)
 
 def is_mrugesh(opponent_moves, your_moves):
-    #ipdb.set_trace()
 
     opponent_history = ['']
     mrugesh_predictions = ['R']
@@ -247,11 +231,9 @@ def predict_move(opponent, opponent_moves, your_moves, play_order):
             move = counter_Quincy(opponent_moves)
 
         case PlayerType.MRUGESH:
-            #print('mrugesh logic')
             move = counter_mrugesh(your_moves)
 
         case PlayerType.KRIS:
-            #print('kris logic')
             move = counter_Kris(your_moves)
 
         case PlayerType.ABBEY:
@@ -259,7 +241,6 @@ def predict_move(opponent, opponent_moves, your_moves, play_order):
 
         case _:
             # DEFAULT STRATEGY FOR UNKNWON PLAYER FOR NOW RANDOM
-            #print('unknown')
             move = random.choice(['R', 'P', 'S']) 
         
     return move
